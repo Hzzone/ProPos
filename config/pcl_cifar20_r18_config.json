@@ -1,0 +1,168 @@
+{
+    "amp": {
+        "desc": null,
+        "value": false
+    },
+    "mlp": {
+        "desc": null,
+        "value": true
+    },
+    "seed": {
+        "desc": null,
+        "value": 1
+    },
+    "faiss": {
+        "desc": null,
+        "value": false
+    },
+    "_wandb": {
+        "desc": null,
+        "value": {
+            "t": {
+                "1": [
+                    1,
+                    5
+                ],
+                "2": [
+                    1,
+                    5
+                ],
+                "3": [
+                    13,
+                    16
+                ],
+                "4": "3.8.8",
+                "5": "0.12.6",
+                "8": [
+                    5
+                ]
+            },
+            "framework": "torch",
+            "start_time": 1636910035,
+            "cli_version": "0.12.6",
+            "is_jupyter_run": false,
+            "python_version": "3.8.8",
+            "is_kaggle_kernel": false
+        }
+    },
+    "epochs": {
+        "desc": null,
+        "value": 1000
+    },
+    "dataset": {
+        "desc": null,
+        "value": "cifar20"
+    },
+    "feat_dim": {
+        "desc": null,
+        "value": 128
+    },
+    "img_size": {
+        "desc": null,
+        "value": 32
+    },
+    "momentum": {
+        "desc": null,
+        "value": 0.9
+    },
+    "reassign": {
+        "desc": null,
+        "value": 1
+    },
+    "run_name": {
+        "desc": null,
+        "value": "cifar20_resnet18_new_run2"
+    },
+    "use_copy": {
+        "desc": null,
+        "value": false
+    },
+    "moco_temp": {
+        "desc": null,
+        "value": 1
+    },
+    "save_freq": {
+        "desc": null,
+        "value": 1
+    },
+    "symmetric": {
+        "desc": null,
+        "value": true
+    },
+    "batch_size": {
+        "desc": null,
+        "value": 128
+    },
+    "local_rank": {
+        "desc": null,
+        "value": 0
+    },
+    "model_name": {
+        "desc": null,
+        "value": "pcl"
+    },
+    "print_freq": {
+        "desc": null,
+        "value": 10
+    },
+    "queue_size": {
+        "desc": null,
+        "value": 4096
+    },
+    "data_folder": {
+        "desc": null,
+        "value": "/home/zzhuang/DATASET"
+    },
+    "num_cluster": {
+        "desc": null,
+        "value": null
+    },
+    "num_workers": {
+        "desc": null,
+        "value": 32
+    },
+    "encoder_name": {
+        "desc": null,
+        "value": "bigresnet18"
+    },
+    "num_clusters": {
+        "desc": null,
+        "value": "250,500,1000"
+    },
+    "resume_epoch": {
+        "desc": null,
+        "value": 0
+    },
+    "weight_decay": {
+        "desc": null,
+        "value": 0.0001
+    },
+    "data_resample": {
+        "desc": null,
+        "value": false
+    },
+    "learning_rate": {
+        "desc": null,
+        "value": 0.1
+    },
+    "moco_momentum": {
+        "desc": null,
+        "value": 0.99
+    },
+    "warmup_epochs": {
+        "desc": null,
+        "value": 50
+    },
+    "whole_dataset": {
+        "desc": null,
+        "value": true
+    },
+    "cls_loss_weight": {
+        "desc": null,
+        "value": 0.01
+    },
+    "use_gaussian_blur": {
+        "desc": null,
+        "value": false
+    }
+}

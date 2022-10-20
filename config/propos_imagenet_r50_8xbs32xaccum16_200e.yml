@@ -1,0 +1,43 @@
+batch_size: 32
+num_devices: 8
+resume_epoch: 170
+resume_name: '2022_09_21_01_02_06-propos_imagenet_r50_8xbs32xaccum16_200e'
+
+num_workers: 16
+encoder_name: resnet50
+epochs: 200
+warmup_epochs: 10
+feat_dim: 256
+hidden_size: 4096
+momentum_base: 0.99
+momentum_max: 1.0
+momentum_increase: true
+syncbn: true
+symmetric: true
+
+dataset: imagenet
+byol_transform: true
+test_resized_crop: true
+use_gaussian_blur: true
+eval_metric:
+  - nmi
+img_size: 224
+
+reassign: 10
+save_freq: 1
+test_freq: 1000
+save_checkpoints: true
+dist: true
+
+acc_grd_step: 16
+lambda_predictor_lr: 1.0
+learning_rate: 0.3
+learning_eta_min: 0.
+lars: true
+weight_decay: 0.000001
+exclude_bias_and_bn: true
+
+model_name: propos
+cluster_loss_weight: 0.001
+latent_std: 0.0001
+queue_size: 10240

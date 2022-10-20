@@ -1,0 +1,148 @@
+{
+    "amp": {
+        "desc": null,
+        "value": false
+    },
+    "seed": {
+        "desc": null,
+        "value": 0
+    },
+    "faiss": {
+        "desc": null,
+        "value": false
+    },
+    "_wandb": {
+        "desc": null,
+        "value": {
+            "t": {
+                "1": [
+                    1,
+                    5
+                ],
+                "2": [
+                    1,
+                    5
+                ],
+                "3": [
+                    13,
+                    16
+                ],
+                "4": "3.7.2",
+                "5": "0.12.7",
+                "8": [
+                    5
+                ]
+            },
+            "framework": "torch",
+            "start_time": 1643043546,
+            "cli_version": "0.12.7",
+            "is_jupyter_run": false,
+            "python_version": "3.7.2",
+            "is_kaggle_kernel": false
+        }
+    },
+    "epochs": {
+        "desc": null,
+        "value": 1000
+    },
+    "dataset": {
+        "desc": null,
+        "value": "cifar10"
+    },
+    "feat_dim": {
+        "desc": null,
+        "value": 2048
+    },
+    "img_size": {
+        "desc": null,
+        "value": 32
+    },
+    "momentum": {
+        "desc": null,
+        "value": 0.9
+    },
+    "reassign": {
+        "desc": null,
+        "value": 50
+    },
+    "run_name": {
+        "desc": null,
+        "value": "cifar10_simsiam"
+    },
+    "use_copy": {
+        "desc": null,
+        "value": false
+    },
+    "save_freq": {
+        "desc": null,
+        "value": 50
+    },
+    "batch_size": {
+        "desc": null,
+        "value": 128
+    },
+    "local_rank": {
+        "desc": null,
+        "value": 0
+    },
+    "model_name": {
+        "desc": null,
+        "value": "simsiam"
+    },
+    "print_freq": {
+        "desc": null,
+        "value": 10
+    },
+    "data_folder": {
+        "desc": null,
+        "value": "/home/zzhuang/DATASET"
+    },
+    "num_cluster": {
+        "desc": null,
+        "value": null
+    },
+    "num_workers": {
+        "desc": null,
+        "value": 32
+    },
+    "encoder_name": {
+        "desc": null,
+        "value": "bigresnet34"
+    },
+    "resume_epoch": {
+        "desc": null,
+        "value": 0
+    },
+    "weight_decay": {
+        "desc": null,
+        "value": 0.0005
+    },
+    "data_resample": {
+        "desc": null,
+        "value": false
+    },
+    "learning_rate": {
+        "desc": null,
+        "value": 0.06
+    },
+    "warmup_epochs": {
+        "desc": null,
+        "value": 50
+    },
+    "whole_dataset": {
+        "desc": null,
+        "value": true
+    },
+    "fix_predictor_lr": {
+        "desc": null,
+        "value": true
+    },
+    "use_gaussian_blur": {
+        "desc": null,
+        "value": false
+    },
+    "projection_num_layers": {
+        "desc": null,
+        "value": 2
+    }
+}

@@ -1,0 +1,22 @@
+batch_size: 32
+num_devices: 8
+weight_decay: 0.0
+
+num_workers: 32
+dataset: imagenet
+test_resized_crop: true
+encoder_name: resnet50
+epochs: 100
+img_size: 224
+learning_rate: 30
+momentum: 0.9
+save_freq: 1
+dist: true
+lr_decay_gamma: 0.1
+lr_decay_milestone:
+  - 60
+  - 80
+step_lr: true
+
+model_name: lincls
+pretrained_path: /home/zzhuang/ICLR2022_Codes/ckpt/2022_09_21_01_02_06-propos_imagenet_r50_8xbs32xaccum16_200e/save_models/checkpoint-0000200.tar

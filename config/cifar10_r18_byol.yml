@@ -1,0 +1,33 @@
+batch_size: 128
+num_devices: 4
+momentum_base: 0.996
+momentum_max: 1.0
+momentum_increase: true
+dataset: cifar10
+eval_metric:
+  - nmi
+  - acc
+  - ari
+whole_dataset: true
+encoder_name: bigresnet18
+epochs: 1000
+feat_dim: 256
+hidden_size: 4096
+img_size: 32
+lambda_predictor_lr: 10
+learning_rate: 0.05
+learning_eta_min: 0.
+reassign: 10
+save_freq: 1
+save_checkpoints: true
+shuffling_bn: true
+symmetric: true
+temperature: 0.5
+use_gaussian_blur: false
+warmup_epochs: 50
+weight_decay: 0.0005
+dist: true
+
+model_name: propos
+cluster_loss_weight: 0.
+latent_std: 0.
