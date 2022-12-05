@@ -101,6 +101,7 @@ class TrainTask(object):
 
         # SSL setting
         parser.add_argument('--feat_dim', type=int, default=2048, help='projection feat_dim')
+        parser.add_argument('--data_resample', help='data_resample', action='store_true')
         parser.add_argument('--reassign', type=int, help='reassign kmeans', default=1)
 
         return parser
@@ -111,14 +112,12 @@ class TrainTask(object):
 
     @staticmethod
     def create_dataset(data_root, dataset_name, train, transform=None, memory=False, label_file=None,
-                       with_indices=False):
+                       ):
         has_subfolder = False
         if dataset_name in ['cifar10', 'cifar20', 'cifar100']:
             dataset_type = {'cifar10': torchvision.datasets.CIFAR10,
                             'cifar20': torchvision.datasets.CIFAR100,
                             'cifar100': torchvision.datasets.CIFAR100}[dataset_name]
-            if with_indices:
-                dataset_type = dataset_with_indices(dataset_type)
             has_subfolder = True
             dataset = dataset_type(data_root, train, transform)
             if dataset_name == 'cifar20':
@@ -154,8 +153,6 @@ class TrainTask(object):
         else:
             data_path = osp.join(data_root, dataset_name)
             dataset_type = torchvision.datasets.ImageFolder
-            if train and not memory:
-                dataset_type = dataset_with_indices(dataset_type)
             if 'train' in os.listdir(data_path):
                 has_subfolder = True
                 dataset = dataset_type(
@@ -179,30 +176,40 @@ class TrainTask(object):
                          sampler=False,
                          train=False,
                          memory=False,
+                         data_resample=False,
                          label_file=None):
 
         opt = self.opt
         data_root = opt.data_folder
 
-        with_indices = train and (not memory)
         dataset, has_subfolder = self.create_dataset(data_root, dataset_name,
                                                      train, transform=transform,
                                                      memory=memory,
-                                                     label_file=label_file,
-                                                     with_indices=with_indices)
+                                                     label_file=label_file)
         labels = dataset.targets
         labels = np.array(labels)
 
         if opt.whole_dataset and has_subfolder:
             ano_dataset = self.create_dataset(data_root, dataset_name, not train, transform=transform,
-                                              memory=memory, with_indices=with_indices)[0]
+                                              memory=memory)[0]
             labels = np.concatenate([labels, ano_dataset.targets], axis=0)
             dataset = torch.utils.data.ConcatDataset([dataset, ano_dataset])
 
+        with_indices = train and (not memory)
+        if with_indices:
+            dataset = dataset_with_indices(dataset)
+
         if sampler:
             if dist.is_initialized():
-                sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=shuffle)
+                from utils.sampler import RandomSampler
+                if shuffle and data_resample:
+                    num_iter = len(dataset) // (batch_size * dist.get_world_size())
+                    sampler = RandomSampler(dataset=dataset, batch_size=batch_size, num_iter=num_iter, restore_iter=0,
+                                            weights=None, replacement=True, seed=0, shuffle=True)
+                else:
+                    sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=shuffle)
             else:
+                # memory loader
                 sampler = None
         else:
             sampler = None
@@ -313,6 +320,7 @@ class TrainTask(object):
             drop_last=True,
             sampler=True,
             train=True,
+            data_resample=opt.data_resample,
             label_file=opt.label_file)
         if sampler is None:
             sampler = train_loader.sampler
@@ -515,6 +523,14 @@ class TrainTask(object):
             'labels': mem_labels,
             'epoch': self.cur_epoch
         }
+
+        if opt.data_resample:
+            counts = torch.unique(psedo_labels.cpu(), return_counts=True)[1]
+            weights = torch.zeros(psedo_labels.size()).float()
+            for l in range(counts.size(0)):
+                weights[psedo_labels == l] = psedo_labels.size(0) / counts[l]
+            self.sampler.set_weights(weights)
+            self.logger.msg_str(f'set the weights of train dataloader as {weights.cpu().numpy()}')
 
         torch.cuda.empty_cache()
 

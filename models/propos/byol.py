@@ -74,6 +74,7 @@ class BYOL(TrainTask):
         parser.add_argument('--latent_std', type=float, help='latent_std', default=0.0)
         parser.add_argument('--temperature', type=float, default=0.5, help='temperature')
         parser.add_argument('--queue_size', type=int, help='queue_size', default=0)
+        parser.add_argument('--v2', help='v2', action='store_true')
 
         return parser
 
@@ -95,7 +96,7 @@ class BYOL(TrainTask):
         # compute loss
         with torch.autocast('cuda', enabled=opt.amp):
             contrastive_loss, cluster_loss_batch, q = self.byol(
-                im_q, im_k, indices, update_params)
+                im_q, im_k, indices, update_params, opt.v2)
 
         loss = contrastive_loss + cluster_loss_batch * opt.cluster_loss_weight * float(not is_warmup)
 
@@ -168,4 +169,3 @@ class BYOL(TrainTask):
         train_transform2 = transforms.Compose(train_transform2)
         train_transform = TwoCropTransform(train_transform1, train_transform2)
         return train_transform
-

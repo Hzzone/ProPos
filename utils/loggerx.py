@@ -118,7 +118,7 @@ class LoggerX(object):
             output_str += '{} {:2.5f}, '.format(var_name, var)
             output_dict[var_name] = var
 
-        if self.enable_wandb:
+        if self.enable_wandb and self.local_rank == 0:
             import wandb
             wandb.log(output_dict, step)
 

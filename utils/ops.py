@@ -48,19 +48,16 @@ def concat_all_gather(tensor):
     return output
 
 
-def dataset_with_indices(cls):
-    """
-    Modifies the given Dataset class to return a tuple data, target, index
-    instead of just data, target.
-    """
+class dataset_with_indices(torch.utils.data.Dataset):
+    def __init__(self, dataset):
+        self.dataset = dataset
 
-    def __getitem__(self, index):
-        data = cls.__getitem__(self, index)
-        return [data, index]
+    def __len__(self):
+        return len(self.dataset)
 
-    return type(cls.__name__, (cls,), {
-        '__getitem__': __getitem__,
-    })
+    def __getitem__(self, idx):
+        outs = self.dataset[idx]
+        return [outs, idx]
 
 
 def convert_to_cuda(data):

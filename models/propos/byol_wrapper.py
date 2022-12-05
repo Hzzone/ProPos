@@ -183,7 +183,7 @@ class BYOLWrapper(MoCoWrapper):
             cluster_loss_batch = self.compute_cluster_loss(q_centers, k_centers, self.temperature, batch_psedo_labels)
         return contrastive_loss, cluster_loss_batch, all_q, all_k
 
-    def forward(self, im_q, im_k, indices, momentum_update=True):
+    def forward(self, im_q, im_k, indices, momentum_update=True, v2=False):
         """
         Input:
             im_q: a batch of query images
@@ -191,6 +191,8 @@ class BYOLWrapper(MoCoWrapper):
         Output:
             logits, targets
         """
+        if v2:
+            return self.forward_v2(im_q, im_k, indices, momentum_update=momentum_update)
 
         psedo_labels = self.psedo_labels[indices]
         if self.symmetric:
@@ -215,6 +217,42 @@ class BYOLWrapper(MoCoWrapper):
             self._dequeue_and_enqueue(k, indices)
 
         return contrastive_loss, cluster_loss_batch, q
+
+    def forward_v2(self, im_q_, im_k_, indices, momentum_update=True):
+        if momentum_update:
+            # update the key encoder
+            with torch.no_grad():  # no gradient to keys
+                self._momentum_update_key_encoder()
+
+        im_q = torch.cat([im_q_, im_k_], dim=0)
+        im_k = torch.cat([im_k_, im_q_], dim=0)
+
+        psedo_labels = self.psedo_labels[indices]
+        # compute query features
+        q = self.encoder_q(im_q)  # queries: NxC
+        q = self.projector_q(q)
+
+        batch_psedo_labels = psedo_labels
+        batch_all_psedo_labels = self.concat_all_gather(batch_psedo_labels)
+        k, _, all_k = self.forward_k(im_k, batch_all_psedo_labels.repeat(2))
+        k1, k2 = all_k.chunk(2, dim=0)
+        k_centers_1 = self.compute_centers(k1, batch_all_psedo_labels)
+        k_centers_2 = self.compute_centers(k2, batch_all_psedo_labels)
+
+        noise_q = q + torch.randn_like(q) * self.latent_std
+
+        contrastive_loss = (2 - 2 * F.cosine_similarity(self.predictor(noise_q), k)).mean()
+        all_q = F.normalize(torch.cat(GatherLayer.apply(q), dim=0), dim=1)
+
+        q1, q2 = all_q.chunk(2, dim=0)
+        q_centers_1 = self.compute_centers(q1, batch_all_psedo_labels)
+        q_centers_2 = self.compute_centers(q2, batch_all_psedo_labels)
+        cluster_loss_batch = (self.compute_cluster_loss(q_centers_1, k_centers_1,
+                                                        self.temperature, batch_psedo_labels) +
+                              self.compute_cluster_loss(q_centers_2, k_centers_2,
+                                                        self.temperature, batch_psedo_labels)) / 2.0
+
+        return contrastive_loss, cluster_loss_batch, all_q
 
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys, indices):
