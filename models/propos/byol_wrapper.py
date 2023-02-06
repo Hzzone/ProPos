@@ -119,8 +119,8 @@ class BYOLWrapper(MoCoWrapper):
         # q -> k
         # d_q = q_centers.mm(k_centers.T) / temperature
 
-        zero_classes = torch.arange(self.num_cluster)[torch.sum(F.one_hot(torch.unique(psedo_labels),
-                                                                          self.num_cluster), dim=0) == 0]
+        zero_classes = torch.arange(self.num_cluster).cuda()[torch.sum(F.one_hot(torch.unique(psedo_labels),
+                                                                                 self.num_cluster), dim=0) == 0]
         mask = torch.zeros((self.num_cluster, self.num_cluster), dtype=torch.bool, device=d_q.device)
         mask[:, zero_classes] = 1
         d_q.masked_fill_(mask, -10)

@@ -3,6 +3,8 @@ from __future__ import print_function
 import os
 import os.path as osp
 import argparse
+import warnings
+
 import torch
 import torchvision.datasets
 from torchvision import transforms
@@ -265,12 +267,12 @@ class TrainTask(object):
 
     def test_transform(self, normalize):
         opt = self.opt
-        import torchvision.transforms.functional_pil as fpil
+
         def resize(image):
             size = (opt.img_size, opt.img_size)
             if image.size == size:
                 return image
-            return fpil.resize(image, size=size)
+            return image.resize(size)
 
         test_transform = []
         if opt.test_resized_crop:
@@ -329,6 +331,9 @@ class TrainTask(object):
         test_transform = self.test_transform(normalize)
         self.logger.msg_str(f'set test transform... \n {str(test_transform)}')
 
+        if 'imagenet' in opt.dataset:
+            if not opt.test_resized_crop:
+                warnings.warn('ImageNet should center crop during testing...')
         test_loader = self.build_dataloader(opt.dataset,
                                             test_transform,
                                             train=False,
