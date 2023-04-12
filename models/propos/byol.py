@@ -9,6 +9,8 @@
 '''
 
 import argparse
+import copy
+
 import torch
 import numpy as np
 from utils.ops import convert_to_ddp
@@ -26,7 +28,10 @@ class BYOL(TrainTask):
         opt = self.opt
         encoder_type, dim_in = backbone_dict[opt.encoder_name]
         encoder = encoder_type()
-        byol = self.__BYOLWrapper__(encoder, in_dim=dim_in, **vars(opt))
+        byol = self.__BYOLWrapper__(encoder, in_dim=dim_in, num_cluster=self.num_cluster, temperature=opt.temperature,
+                                    hidden_size=opt.hidden_size, fea_dim=opt.feat_dim, byol_momentum=opt.momentum_base,
+                                    symmetric=opt.symmetric, shuffling_bn=opt.shuffling_bn, latent_std=opt.latent_std,
+                                    queue_size=opt.queue_size)
         if opt.syncbn:
             if opt.shuffling_bn:
                 byol.encoder_q = torch.nn.SyncBatchNorm.convert_sync_batchnorm(byol.encoder_q)
@@ -44,11 +49,12 @@ class BYOL(TrainTask):
 
         self.logger.modules = [byol, optimizer]
         # Initialization
+        self.feature_extractor_copy = copy.deepcopy(byol.encoder).cuda()
         byol = byol.cuda()
+        self.feature_extractor = byol.encoder
         byol = convert_to_ddp(byol)
         self.byol = byol
         self.optimizer = optimizer
-        self.feature_extractor = byol.module.encoder
 
     @staticmethod
     def build_options():

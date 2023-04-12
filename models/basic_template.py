@@ -41,6 +41,7 @@ class TrainTask(object):
                               entity=opt.entity,
                               name=opt.run_name)
         self.feature_extractor = None
+        self.feature_extractor_copy = None
         self.set_loader()
         self.set_model()
         self.scaler = NativeScalerWithGradNormCount(amp=opt.amp)
@@ -100,6 +101,7 @@ class TrainTask(object):
         parser.add_argument('--model_name', type=str, help='the type of method', default='supcon')
         parser.add_argument('--use_gaussian_blur', help='use_gaussian_blur', action='store_true')
         parser.add_argument('--save_checkpoints', help='save_checkpoints', action='store_true')
+        parser.add_argument('--use_copy', help='use_copy', action='store_true')
 
         # SSL setting
         parser.add_argument('--feat_dim', type=int, default=2048, help='projection feat_dim')
@@ -416,11 +418,16 @@ class TrainTask(object):
         if opt.whole_dataset:
             return
 
-        test_features, test_labels = extract_features(self.feature_extractor, self.test_loader)
+        if opt.use_copy:
+            feature_extractor = self.feature_extractor_copy
+        else:
+            feature_extractor = self.feature_extractor
+
+        test_features, test_labels = extract_features(feature_extractor, self.test_loader)
         if hasattr(self, 'mem_data') and self.mem_data['epoch'] == self.cur_epoch:
             mem_features, mem_labels = self.mem_data['features'], self.mem_data['labels']
         else:
-            mem_features, mem_labels = extract_features(self.feature_extractor, self.memory_loader)
+            mem_features, mem_labels = extract_features(feature_extractor, self.memory_loader)
             if self.l2_normalize:
                 mem_features.div_(torch.linalg.norm(mem_features, dim=1, ord=2, keepdim=True))
         if self.l2_normalize:
@@ -499,7 +506,17 @@ class TrainTask(object):
         torch.cuda.empty_cache()
         self.logger.msg_str('Generating the psedo-labels')
 
-        mem_features, mem_labels = extract_features(self.feature_extractor, self.memory_loader)
+        if opt.use_copy:
+            msg = self.feature_extractor_copy.load_state_dict(self.feature_extractor.state_dict())
+            self.logger.msg_str(msg)
+            params = self.feature_extractor_copy.state_dict()
+            for k in params:
+                dist.broadcast(params[k], src=0)
+            feature_extractor = self.feature_extractor_copy
+        else:
+            feature_extractor = self.feature_extractor
+
+        mem_features, mem_labels = extract_features(feature_extractor, self.memory_loader)
         if self.l2_normalize:
             # mem_features = F.normalize(mem_features, dim=1)
             mem_features.div_(torch.linalg.norm(mem_features, dim=1, ord=2, keepdim=True))

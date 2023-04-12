@@ -34,8 +34,7 @@ class BYOLWrapper(MoCoWrapper):
                  symmetric=True,
                  shuffling_bn=True,
                  latent_std=0.001,
-                 queue_size=0,
-                 **kwargs):
+                 queue_size=0):
         nn.Module.__init__(self)
 
         self.symmetric = symmetric
